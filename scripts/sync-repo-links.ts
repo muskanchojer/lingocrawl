@@ -12,7 +12,11 @@
  *
  *   npm run sync-repo-links
  */
-import "dotenv/config";
+import { config } from "dotenv";
+
+// Next.js keeps local secrets in .env.local; load it (then .env) so the
+// script sees the same Supabase credentials as the app.
+config({ path: [".env.local", ".env"], quiet: true });
 import { mkdtemp, readdir, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
@@ -54,6 +58,21 @@ export function dedupeRepoLinkRows(rows: RepoLinkRow[]): RepoLinkRow[] {
   return [...seen.values()];
 }
 
+/** Supabase/PostgREST silently caps any single query at 1,000 rows, so
+ * loading a whole table means asking page by page until one comes back
+ * short. Without this the sync only ever saw the first 1,000 languages. */
+export async function fetchAllRows<T>(
+  fetchPage: (from: number, to: number) => Promise<T[]>,
+  pageSize = 1000,
+): Promise<T[]> {
+  const all: T[] = [];
+  for (let from = 0; ; from += pageSize) {
+    const page = await fetchPage(from, from + pageSize - 1);
+    all.push(...page);
+    if (page.length < pageSize) return all;
+  }
+}
+
 async function downloadTarball(destPath: string) {
   const response = await fetch(TARBALL_URL);
   if (!response.ok) {
@@ -81,11 +100,16 @@ async function main() {
 
   let languages: MatchableLanguage[];
   if (supabase) {
-    const { data, error } = await supabase
-      .from("languages")
-      .select("id, ref_name, alt_names, repo_file_slug");
-    if (error) throw new Error(`Failed to load languages from Supabase: ${error.message}`);
-    languages = data.map((row) => ({
+    const rows = await fetchAllRows(async (from, to) => {
+      const { data, error } = await supabase
+        .from("languages")
+        .select("id, ref_name, alt_names, repo_file_slug")
+        .order("id")
+        .range(from, to);
+      if (error) throw new Error(`Failed to load languages from Supabase: ${error.message}`);
+      return data;
+    });
+    languages = rows.map((row) => ({
       id: row.id,
       refName: row.ref_name,
       altNames: row.alt_names ?? [],

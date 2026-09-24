@@ -252,7 +252,7 @@ export function SubmissionForm({
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
             <label className="mb-1 block text-sm font-semibold text-ink-soft">
-              Your name (optional)
+              Your name
             </label>
             <Input
               value={contributorName}
@@ -262,7 +262,7 @@ export function SubmissionForm({
           </div>
           <div>
             <label className="mb-1 block text-sm font-semibold text-ink-soft">
-              Your email (optional)
+              Your email
             </label>
             <Input
               type="email"
@@ -272,8 +272,8 @@ export function SubmissionForm({
           </div>
         </div>
         <p className="text-sm text-ink-soft">
-          Only the review team sees these, in case we have a question. They are never shown on
-          the website.
+          Name and email are optional. Only the review team sees them, in case we have a
+          question. They are never shown on the website.
         </p>
       </div>
 

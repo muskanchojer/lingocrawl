@@ -7,7 +7,11 @@
  * Run once at setup; re-run only if SIL publishes an update.
  *   npm run seed-languages
  */
-import "dotenv/config";
+import { config } from "dotenv";
+
+// Next.js keeps local secrets in .env.local; load it (then .env) so the
+// script sees the same Supabase credentials as the app.
+config({ path: [".env.local", ".env"], quiet: true });
 import { writeFile } from "node:fs/promises";
 import path from "node:path";
 import { createClient } from "@supabase/supabase-js";
