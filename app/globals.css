@@ -1,0 +1,42 @@
+@import "tailwindcss";
+
+:root {
+  --color-paper: #fbf6ec;
+  --color-paper-raised: #ffffff;
+  --color-ink: #2a2118;
+  --color-ink-soft: #7a6b5a;
+  --color-border: #e8dfd0;
+
+  /* All five category colors and the accent are tuned so white text on a
+     filled swatch clears WCAG AA's 4.5:1 contrast ratio (verified by
+     computing each hex's relative luminance, not eyeballed). */
+  --color-accent: #d63e18;
+  --color-accent-hover: #b8330f;
+
+  --color-cat-news: #d93e19;
+  --color-cat-culture: #1e8173;
+  --color-cat-government: #9c6b17;
+  --color-cat-political: #2a7bb6;
+  --color-cat-other: #7c63d6;
+}
+
+@theme inline {
+  --color-paper: var(--color-paper);
+  --color-paper-raised: var(--color-paper-raised);
+  --color-ink: var(--color-ink);
+  --color-ink-soft: var(--color-ink-soft);
+  --color-border: var(--color-border);
+  --color-accent: var(--color-accent);
+  --color-accent-hover: var(--color-accent-hover);
+  --color-cat-news: var(--color-cat-news);
+  --color-cat-culture: var(--color-cat-culture);
+  --color-cat-government: var(--color-cat-government);
+  --color-cat-political: var(--color-cat-political);
+  --color-cat-other: var(--color-cat-other);
+  --font-sans: var(--font-baloo);
+}
+
+body {
+  background: var(--color-paper);
+  color: var(--color-ink);
+}
