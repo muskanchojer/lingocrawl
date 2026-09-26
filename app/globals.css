@@ -1,23 +1,24 @@
 @import "tailwindcss";
 
 :root {
-  --color-paper: #fbf6ec;
+  /* Pure grayscale. Category stickers are told apart by their icon and label
+     (and a checkmark when selected), not by hue. Every fill below clears
+     WCAG AA 4.5:1 for white text, and ink/ink-soft clear it on the page
+     background (values computed, not eyeballed). */
+  --color-paper: #f4f4f4;
   --color-paper-raised: #ffffff;
-  --color-ink: #2a2118;
-  --color-ink-soft: #7a6b5a;
-  --color-border: #e8dfd0;
+  --color-ink: #1a1a1a;
+  --color-ink-soft: #5c5c5c;
+  --color-border: #cfcfcf;
 
-  /* All five category colors and the accent are tuned so white text on a
-     filled swatch clears WCAG AA's 4.5:1 contrast ratio (verified by
-     computing each hex's relative luminance, not eyeballed). */
-  --color-accent: #d63e18;
-  --color-accent-hover: #b8330f;
+  --color-accent: #222222;
+  --color-accent-hover: #000000;
 
-  --color-cat-news: #d93e19;
-  --color-cat-culture: #1e8173;
-  --color-cat-government: #9c6b17;
-  --color-cat-political: #2a7bb6;
-  --color-cat-other: #7c63d6;
+  --color-cat-news: #1f1f1f;
+  --color-cat-culture: #3d3d3d;
+  --color-cat-government: #525252;
+  --color-cat-political: #666666;
+  --color-cat-other: #767676;
 }
 
 @theme inline {

@@ -1,6 +1,6 @@
 "use client";
 
-import { Check } from "lucide-react";
+import { Check, TriangleAlert } from "lucide-react";
 import Script from "next/script";
 import { useEffect, useId, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -297,13 +297,25 @@ export function SubmissionForm({
           <div ref={turnstileContainerRef} />
         </>
       ) : (
-        <p className="text-sm font-semibold text-cat-news">
+        <p
+          role="alert"
+          className="flex items-start gap-2 rounded-2xl border-2 border-ink bg-paper-raised p-3 text-sm font-semibold"
+        >
+          <TriangleAlert className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
           Verification isn&apos;t configured yet (missing Turnstile site key) — submissions are
           disabled until it is.
         </p>
       )}
 
-      {error && <p className="font-semibold text-cat-news">{error}</p>}
+      {error && (
+        <p
+          role="alert"
+          className="flex items-start gap-2 rounded-2xl border-2 border-ink bg-paper-raised p-3 font-semibold"
+        >
+          <TriangleAlert className="mt-0.5 h-5 w-5 shrink-0" aria-hidden />
+          {error}
+        </p>
+      )}
 
       <Button type="submit" size="lg" disabled={submitting} className="w-full">
         {submitting ? "Sending..." : "Share these links"}

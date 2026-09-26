@@ -1,11 +1,12 @@
 "use client";
 
-import { Globe2 } from "lucide-react";
+import { Globe2, PartyPopper } from "lucide-react";
 import { useEffect, useState } from "react";
 import { LanguagePicker } from "@/components/language-picker";
 import { SubmissionForm } from "@/components/submission-form";
 import { UrlList, type UrlListItem } from "@/components/url-list";
 import { loadLanguages, type LanguageRecord } from "@/lib/languages";
+import { fetchAllRows } from "@/lib/paging";
 import { supabase } from "@/lib/supabase/client";
 
 // Wording adapted from the web-languages project's own README ("What kind
@@ -79,11 +80,16 @@ export default function Home() {
 
   async function loadLists(languageId: string) {
     setLoadingLists(true);
-    const [repoResult, submissionsResult] = await Promise.all([
-      supabase
-        .from("repo_links")
-        .select("url, category, note")
-        .eq("language_id", languageId),
+    const [repoRows, submissionsResult] = await Promise.all([
+      fetchAllRows(async (from, to) => {
+        const { data } = await supabase
+          .from("repo_links")
+          .select("url, category, note")
+          .eq("language_id", languageId)
+          .order("url")
+          .range(from, to);
+        return (data as UrlListItem[]) ?? [];
+      }),
       supabase
         .from("public_submissions")
         .select("url, category, note")
@@ -91,7 +97,7 @@ export default function Home() {
         .order("submitted_at", { ascending: false })
         .limit(20),
     ]);
-    setRepoLinks((repoResult.data as UrlListItem[]) ?? []);
+    setRepoLinks(repoRows);
     setRecentSubmissions((submissionsResult.data as UrlListItem[]) ?? []);
     setLoadingLists(false);
   }
@@ -132,7 +138,7 @@ export default function Home() {
       {selected &&
         (thanks ? (
           <div className="flex flex-col items-center gap-3 rounded-3xl border-2 border-border bg-paper-raised p-8 text-center">
-            <span className="text-5xl">🎉</span>
+            <PartyPopper className="h-12 w-12 text-accent" aria-hidden />
             <h2 className="text-2xl font-extrabold">
               Thanks! You shared {thanks.count} {thanks.count === 1 ? "link" : "links"} for{" "}
               {selected.refName}.
@@ -144,12 +150,14 @@ export default function Home() {
           </div>
         ) : (
           <div className="flex flex-col gap-6">
-            {!loadingLists && (repoLinks.length > 0 || recentSubmissions.length > 0) && (
-              <div className="flex flex-col gap-4">
+            {loadingLists ? (
+              <p className="text-center text-ink-soft">Looking for sites already listed...</p>
+            ) : (
+              <div key={selected.id} className="flex flex-col gap-4">
                 <UrlList
                   heading="Already on GitHub"
                   items={repoLinks}
-                  emptyMessage="No confirmed sites yet for this language."
+                  emptyMessage="No sites are listed on GitHub for this language yet. You could be the first!"
                 />
                 <UrlList
                   heading="Recently submitted here"

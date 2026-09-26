@@ -25,6 +25,7 @@ import * as tar from "tar";
 import { createClient } from "@supabase/supabase-js";
 import languagesData from "../public/languages.json";
 import { matchLanguageByName, type LanguageRecord } from "../lib/languages";
+import { fetchAllRows } from "../lib/paging";
 import { parseLanguageMarkdown, type RepoLink } from "../lib/repo-markdown";
 
 const TARBALL_URL =
@@ -56,21 +57,6 @@ export function dedupeRepoLinkRows(rows: RepoLinkRow[]): RepoLinkRow[] {
     if (!seen.has(key)) seen.set(key, row);
   }
   return [...seen.values()];
-}
-
-/** Supabase/PostgREST silently caps any single query at 1,000 rows, so
- * loading a whole table means asking page by page until one comes back
- * short. Without this the sync only ever saw the first 1,000 languages. */
-export async function fetchAllRows<T>(
-  fetchPage: (from: number, to: number) => Promise<T[]>,
-  pageSize = 1000,
-): Promise<T[]> {
-  const all: T[] = [];
-  for (let from = 0; ; from += pageSize) {
-    const page = await fetchPage(from, from + pageSize - 1);
-    all.push(...page);
-    if (page.length < pageSize) return all;
-  }
 }
 
 async function downloadTarball(destPath: string) {

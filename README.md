@@ -57,7 +57,18 @@ Supabase Table Editor: filter `submissions` by `status = 'pending'`, edit
 
 ## Deployment
 
-Deploy to Vercel with the same environment variables set in the project
-settings. Re-run `npm run sync-repo-links` periodically to refresh
-`repo_links`, and ping the Supabase project now and then so the free tier
-doesn't pause from inactivity.
+Deployed on [Railway](https://railway.com), which auto-detects `npm run
+build` and `npm run start`.
+
+1. Add the same six variables from `.env.example` as **service variables**
+   in Railway. Set them *before* the first build: `NEXT_PUBLIC_*` values are
+   baked into the site at build time, and the build fails without them.
+2. Use real Cloudflare Turnstile keys (the `1x000...` keys are test keys that
+   pass everything) and add your Railway domain to the widget's allowed
+   domains.
+3. Deploy, either by connecting a GitHub repo (redeploys on every push) or
+   with the Railway CLI: `railway login`, `railway link`, `railway up`.
+
+Re-run `npm run sync-repo-links` periodically to refresh `repo_links`, and
+open the Supabase project now and then so the free tier doesn't pause from
+inactivity.
