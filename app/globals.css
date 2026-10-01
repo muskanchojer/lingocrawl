@@ -1,24 +1,27 @@
 @import "tailwindcss";
 
 :root {
-  /* Pure grayscale. Category stickers are told apart by their icon and label
-     (and a checkmark when selected), not by hue. Every fill below clears
-     WCAG AA 4.5:1 for white text, and ink/ink-soft clear it on the page
-     background (values computed, not eyeballed). */
-  --color-paper: #f4f4f4;
+  /* "Registry" world: government-portal/ISO-register trust language fused
+     with competitive-programming platform density and institutional
+     editorial calm. One accent (navy), two status colors (verified-green,
+     pending-amber) — not five candy colors. Every text pairing below
+     clears WCAG AA 4.5:1 (computed, not eyeballed). */
+  --color-paper: #f6f5f1;
   --color-paper-raised: #ffffff;
-  --color-ink: #1a1a1a;
-  --color-ink-soft: #5c5c5c;
-  --color-border: #cfcfcf;
+  --color-ink: #14171f;
+  --color-ink-soft: #5a6072;
+  --color-border: #d8d6ce;
 
-  --color-accent: #222222;
-  --color-accent-hover: #000000;
+  --color-navy: #162447;
+  --color-navy-hover: #0e1830;
+  --color-verified: #15803d;
+  --color-pending: #9a6400;
 
-  --color-cat-news: #1f1f1f;
-  --color-cat-culture: #3d3d3d;
-  --color-cat-government: #525252;
-  --color-cat-political: #666666;
-  --color-cat-other: #767676;
+  /* Old-newspaper type: one variable serif, Fraunces, for both body and
+     headings. Its optical-size axis renders a sturdier text cut at body
+     sizes and a more expressive display cut at heading sizes on its own —
+     one family, two readable registers. */
+  --font-serif: var(--font-fraunces), Georgia, serif;
 }
 
 @theme inline {
@@ -27,17 +30,33 @@
   --color-ink: var(--color-ink);
   --color-ink-soft: var(--color-ink-soft);
   --color-border: var(--color-border);
-  --color-accent: var(--color-accent);
-  --color-accent-hover: var(--color-accent-hover);
-  --color-cat-news: var(--color-cat-news);
-  --color-cat-culture: var(--color-cat-culture);
-  --color-cat-government: var(--color-cat-government);
-  --color-cat-political: var(--color-cat-political);
-  --color-cat-other: var(--color-cat-other);
-  --font-sans: var(--font-baloo);
+  --color-navy: var(--color-navy);
+  --color-navy-hover: var(--color-navy-hover);
+  --color-verified: var(--color-verified);
+  --color-pending: var(--color-pending);
+  --font-sans: var(--font-serif);
+  --font-heading: var(--font-serif);
+  --font-mono: var(--font-plex-mono);
 }
 
 body {
   background: var(--color-paper);
   color: var(--color-ink);
+  font-optical-sizing: auto;
+}
+
+/* Tabular figures wherever a number is data, not prose — the one place
+   this surface owns a typographic signature. */
+.tabular-data {
+  font-variant-numeric: tabular-nums;
+}
+
+::selection {
+  background: var(--color-navy);
+  color: #ffffff;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-navy);
+  outline-offset: 2px;
 }

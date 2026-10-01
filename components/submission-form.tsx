@@ -123,7 +123,7 @@ export function SubmissionForm({
       return;
     }
     if (links.some((link) => link.category === null)) {
-      setError("Pick a category sticker for every link.");
+      setError("Pick a category for every link.");
       return;
     }
     if (!turnstileToken) {
@@ -165,8 +165,12 @@ export function SubmissionForm({
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-6">
       <div className="flex flex-col gap-4">
-        {rows.map((row, index) => (
-          <div key={row.key} className="rounded-2xl border-2 border-border bg-paper-raised p-4">
+        <div className="flex flex-col">
+          {rows.map((row, index) => (
+          <div
+            key={row.key}
+            className={index > 0 ? "border-t border-border pt-4 mt-4" : ""}
+          >
             <div className="flex items-start gap-3">
               <div className="flex-1">
                 <label className="mb-1 block text-sm font-semibold text-ink-soft">
@@ -184,7 +188,7 @@ export function SubmissionForm({
                 <button
                   type="button"
                   onClick={() => removeRow(row.key)}
-                  className="mt-7 text-sm font-semibold text-ink-soft hover:text-accent"
+                  className="mt-7 text-sm font-semibold text-ink-soft hover:text-navy"
                   aria-label={`Remove link ${index + 1}`}
                 >
                   Remove
@@ -193,34 +197,21 @@ export function SubmissionForm({
             </div>
 
             <div className="mt-3">
-              <span className="mb-2 block text-sm font-semibold text-ink-soft">Category</span>
-              <div className="flex flex-wrap gap-2">
-                {CATEGORIES.map((category) => {
-                  const meta = CATEGORY_META[category];
-                  const Icon = meta.icon;
-                  const active = row.category === category;
-                  return (
-                    <button
-                      key={category}
-                      type="button"
-                      aria-pressed={active}
-                      onClick={() => updateRow(row.key, { category })}
-                      className={`flex items-center gap-2 rounded-full border-2 px-4 py-2 text-sm font-bold transition-colors ${
-                        active
-                          ? `text-white ${meta.bgClass} border-transparent`
-                          : `text-ink border-border ${meta.hoverBorderClass}`
-                      }`}
-                    >
-                      {active ? (
-                        <Check className="h-4 w-4" aria-hidden />
-                      ) : (
-                        <Icon className="h-4 w-4" aria-hidden />
-                      )}
-                      {meta.label}
-                    </button>
-                  );
-                })}
-              </div>
+              <label className="mb-1 block text-sm font-semibold text-ink-soft">Category</label>
+              <select
+                value={row.category ?? ""}
+                onChange={(e) => updateRow(row.key, { category: e.target.value as Category })}
+                className="h-10 w-full border border-border bg-paper-raised px-3 text-base text-ink focus:border-navy focus:outline-none"
+              >
+                <option value="" disabled>
+                  Choose a category
+                </option>
+                {CATEGORIES.map((category) => (
+                  <option key={category} value={category}>
+                    {CATEGORY_META[category].label}
+                  </option>
+                ))}
+              </select>
             </div>
 
             <div className="mt-3">
@@ -235,7 +226,8 @@ export function SubmissionForm({
               />
             </div>
           </div>
-        ))}
+          ))}
+        </div>
 
         <Button
           type="button"
@@ -272,8 +264,8 @@ export function SubmissionForm({
           </div>
         </div>
         <p className="text-sm text-ink-soft">
-          Name and email are optional. Only the review team sees them, in case we have a
-          question. They are never shown on the website.
+          Name and email are optional. Only used by site maintainers if we have a question — they
+          are never shown on the website.
         </p>
       </div>
 
@@ -294,12 +286,23 @@ export function SubmissionForm({
       {siteKey ? (
         <>
           <Script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" />
-          <div ref={turnstileContainerRef} />
+          <div className="relative">
+            {/* No min-height once a token exists: that means verification
+                already resolved, whether or not Cloudflare drew any visible
+                chrome for it (it doesn't always, with the test key) — there
+                is nothing left to reserve space for. */}
+            <div ref={turnstileContainerRef} className={turnstileToken ? "" : "min-h-[65px]"} />
+            {!turnstileToken && (
+              <div className="absolute inset-0 flex items-center border border-border bg-paper-raised px-3 text-sm text-ink-soft">
+                Checking your browser...
+              </div>
+            )}
+          </div>
         </>
       ) : (
         <p
           role="alert"
-          className="flex items-start gap-2 rounded-2xl border-2 border-ink bg-paper-raised p-3 text-sm font-semibold"
+          className="flex items-start gap-2 border border-pending bg-paper-raised p-3 text-sm font-semibold text-pending"
         >
           <TriangleAlert className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
           Verification isn&apos;t configured yet (missing Turnstile site key) — submissions are
@@ -310,7 +313,7 @@ export function SubmissionForm({
       {error && (
         <p
           role="alert"
-          className="flex items-start gap-2 rounded-2xl border-2 border-ink bg-paper-raised p-3 font-semibold"
+          className="flex items-start gap-2 border border-pending bg-paper-raised p-3 font-semibold text-pending"
         >
           <TriangleAlert className="mt-0.5 h-5 w-5 shrink-0" aria-hidden />
           {error}
@@ -318,7 +321,14 @@ export function SubmissionForm({
       )}
 
       <Button type="submit" size="lg" disabled={submitting} className="w-full">
-        {submitting ? "Sending..." : "Share these links"}
+        {submitting ? (
+          "Sending..."
+        ) : (
+          <>
+            <Check className="h-5 w-5" aria-hidden />
+            Share these links
+          </>
+        )}
       </Button>
     </form>
   );
