@@ -26,37 +26,42 @@ before they are added.
 
 ## Reviewing submissions (for Moderators)
 
-Each submission is an issue in `GITHUB_REPO`, labelled `submission`.
+Every time someone sends links on the site, a new **issue** appears in our
+GitHub repo with the `submission` label. Your job is to check whether each link is relevant.
+No coding or GitHub experience needed. You
+only need a GitHub account with access to this repo.
 
-1. Open the issue. Each link is a tick box, and the link itself is clickable
-   (Ctrl/Cmd-click to open it in a new tab).
-2. Tick the links you accept. Links left unticked are rejected.
-3. Optional: to explain a decision, add a normal comment on the issue before
-   the next step. Comments are only for people to read; they are not saved in
-   the CSV files, but stay on the closed issue.
-4. Add the `validated` label. Ticked links are added to `data/accepted.csv`,
-   unticked ones to `data/rejected.csv`, a comment summarises it, and the
-   issue closes. Leave the issue open until then.
+1. **Choose an open issue** from the Issues tab that has the `submission` label.
+   You'll see a short list of links, each with an empty tick box next to it.
+2. **Check each link properly.** Open it in a new tab (middle-click, or hold
+   Ctrl on Windows / Cmd on Mac and click) so you don't lose the issue page.
+3. **Tick the box** of the link(s) you want to keep. Do not tick the box for any
+   link that you want to reject. 
+4. **Optional:** want to explain a decision? Write a normal comment on the
+   issue first. 
+5. **Add the `validated` label** (right side of the issue → Labels → settings icon →
+   `validated`). This is the last step of your review. An automated action handles the rest.
+   Your ticked links are saved as accepted and the others as rejected and the issue is closed.
 
-To reject the whole submission, close the issue as "not planned" instead.
-Every link is then recorded in `data/rejected.csv`, ticked or not.
+That's it. Don't close the issue yourself after step 5; the bot does it.
+Added the label too early or by mistake? Tell a maintainer.
 
-To see every link in one place, open `data/all-links.csv` (or `/all-links.csv`
-on the live site) in Excel or Sheets. It lists the approved and upstream links
-per language. Rejected links are never in it. Approvals update it
+**Everything looks wrong?** You can reject the whole submission in either
+way, and every link is recorded as rejected:
+   - Don't tick any box. Just add the `validated` label, like usual, or
+   - Close the issue as **"not planned"** (the button next to "Close issue").
+
+To see every link in one place, open `data/all-links.csv` in Excel or Sheets. It lists the approved and upstream links per language. Rejected links are never in it. Approvals update it
 automatically; the upstream part is a saved copy, so refresh it now and then
 with `npm run refresh-all-links` and commit the result.
 
-The `validated` label has to exist in the repo. If it doesn't, create it
-under Issues → Labels. GitHub creates `submission` and `ui:<language>` on its
-own.
-
-## For developers
+## For developers/maintainers
 
 This repo is the engine behind the site above. It's a Next.js app on
 [Railway](https://railway.com). There is no database: the language list
 (names, ISO codes, other names) and the known links are both built from the
-upstream `web-languages` repo on every deploy, and submissions are GitHub
+upstream Common Crawl's
+[`web-languages`](https://github.com/commoncrawl/web-languages) repo, and submissions are GitHub
 issues that end up in a CSV file in this repo.
 
 ```bash
@@ -67,7 +72,8 @@ npm run dev               # local copy for trying out a code change
                           # on Railway and is never started this way
 ```
 
-Submitting links needs a `.env.local` file (gitignored) with two values:
+Submitting links needs a `.env.local` file (gitignored). Copy
+`.env.example` to `.env.local` and fill in two values:
 
 ```
 GITHUB_TOKEN=
@@ -95,15 +101,29 @@ live site. Without them the site still works, but sending a link fails.
    labelled `submission` and `ui:<interface language>`, with the language
    code in its title.
    Links already listed upstream or already approved are dropped first.
-2. A maintainer reviews the issue (see below). The workflow in
-   `.github/workflows/approve-submission.yml` then records the links in
-   `data/accepted.csv` and `data/rejected.csv`, updates `data/all-links.csv`,
-   commits the files, and closes the issue. Railway redeploys on that commit.
+2. A moderator reviews the issue (see "Reviewing submissions" above). The
+   workflow in `.github/workflows/approve-submission.yml` then runs, in one of
+   two ways:
+   - **`validated` label added:** ticked links go to `data/accepted.csv`,
+     unticked ones to `data/rejected.csv`, and `data/all-links.csv` is rebuilt.
+     The files are committed to the default branch, then the issue gets a
+     summary comment and is closed. The issue is only closed after the push
+     succeeds, so a failed push never loses links.
+   - **Issue closed as "not planned":** every link goes to
+     `data/rejected.csv`, and nothing else changes.
 
-Both CSV files record the visitor's interface language (`ui_locale`), the
-the link to the issue it came from (the `issue` column). The workflow uses only
-GitHub's built-in per-run token — no secret of ours is stored on GitHub - and
-ignores labels added by anyone without write access.
+   Railway redeploys on the commit.
+
+Both CSV files have the columns `language_id`, `url`, `note`, `ui_locale` (the
+visitor's interface language), `decided_at` and `issue` (a link to the issue
+the row came from). A link already recorded is not added twice. The workflow
+runs one at a time, uses only GitHub's built-in per-run token (no secret of
+ours is stored on GitHub), and ignores labels added or issues closed by anyone
+without write access.
+
+The `validated` label has to exist in the repo. If it doesn't, create it
+under Issues → Labels. GitHub creates `submission` and `ui:<language>` on its
+own.
 
 **Interface languages:** site content lives in `lib/i18n/messages/`, one file
 per language, with `en.ts` as the source. To add a language, add
